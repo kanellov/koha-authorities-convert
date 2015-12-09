@@ -1,0 +1,26 @@
+
+[% INCLUDE 'doc-head-open.inc' %]
+ <title>Koha: Convert Authorities MARC</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="breadcrumbs">
+	<a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo;
+	<a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo;
+	Convert Authorities &rsaquo;
+	Select file
+</div>
+
+<div id="doc3">
+	<form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="class" value="[% CLASS %]"/>
+        <input type="hidden" name="method" value="[% METHOD %]"/>
+        <input type="file" name="source" />
+
+        <input name="submitted" type="submit" value="Click me" />
+    </form>
+
+[% INCLUDE 'intranet-bottom.inc' %]
