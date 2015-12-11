@@ -14,7 +14,7 @@
 	Select file
 </div>
 
-<div id="doc3">
+<div id="doc3">Step2</div>
 
 
 [% INCLUDE 'intranet-bottom.inc' %]

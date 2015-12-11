@@ -9,6 +9,10 @@ use base qw(Koha::Plugins::Base);
 ## We will also need to include any Koha libraries we want to access
 use Data::Dump qw(dump);
 
+use Koha::Upload;
+use MARC::Moose::Formater::AuthorityUnimarcToMarc21;
+use MARC::Moose::Parser::Iso2709;
+
 ## Here we set our plugin version
 our $VERSION = 1.00;
 
@@ -45,19 +49,19 @@ sub new {
 sub uninstall { return 1; }
 
 sub tool {
-	my ( $self, $args ) = @_;
-	my $cgi = $self->{'cgi'};
+    my ( $self, $args ) = @_;
+    my $cgi = $self->{'cgi'};
 
-	unless ( $cgi->param('submitted') ) {
-		$self->tool_step1();
-	} else {
-		$self->tool_step2();
-	}
+    unless ( $cgi->param('submitted') ) {
+        $self->tool_step1();
+    } else {
+       $self->tool_step2();
+    }
 
 }
 
 sub tool_step1 {
-	my ( $self, $args ) = @_;
+    my ( $self, $args ) = @_;
     my $cgi = $self->{'cgi'};
     my $template = $self->get_template({ file => 'tool-step1.tt' });
 
@@ -66,12 +70,31 @@ sub tool_step1 {
 }
 
 sub tool_step2 {
-	my ( $self, $args ) = @_;
-	my $cgi = $self->{'cgi'};
-	my $template = $self->get_template({ file => 'tool-step2.tt' });
+    my ( $self, $args ) = @_;
+    my $cgi = $self->{'cgi'};
+    my $template = $self->get_template({ file => 'tool-step2.tt' });
 
-	print $cgi->header();
-	print $template->output();
+    my $fileID = $cgi->param('uploadedfileid');
+
+    if($fileID) {
+        my $upload = Koha::Upload->new->get({ id => $fileID, filehandle => 1 });
+        my $fh = $upload->{fh};
+        my $filename = $upload->{name}; # filename only, no path
+        my $marcrecord= '';
+        $/ = "\035";
+        while (<$fh>) {
+            s/^\s+//;
+            s/\s+$//;
+            $marcrecord.=$_;
+        }
+        $fh->close;
+        my $toMarc21Formater = MARC::Moose::Formater::AuthorityUnimarcToMarc21->new();
+        my $marc21 = $toMarc21Formater->format($iso2709Parser->parse($marcrecord));
+        # should download unimarc file
+    }
+
+    print $cgi->header();
+    print $template->output();
 }
 
 1;

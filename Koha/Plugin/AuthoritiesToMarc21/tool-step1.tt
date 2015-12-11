@@ -2,6 +2,28 @@
 [% INCLUDE 'doc-head-open.inc' %]
  <title>Koha: Convert Authorities MARC</title>
 [% INCLUDE 'doc-head-close.inc' %]
+<script type="text/javascript" src="[% themelang %]/js/background-job-progressbar.js"></script>
+<script type="text/javascript" src="[% themelang %]/js/file-upload.js"></script>
+
+<style type="text/css">
+    #fileuploadstatus,
+    #fileuploadfailed,
+    #fileuploadcancel,
+    #convertfile { 
+    	display : none; 
+    }
+
+	#fileuploadstatus {
+		margin:.4em; 
+	}
+    #fileuploadprogress {
+    	width:150px;
+    	height:10px;
+    	border:1px solid #666;
+    	background:url('[% interface %]/[% theme %]/img/progress.png') -300px 0px no-repeat; 
+    }
+
+</style>
 </head>
 <body>
 [% INCLUDE 'header.inc' %]
@@ -14,13 +36,87 @@
 	Select file
 </div>
 
-<div id="doc3">
+<div id="doc3" class="well">
 	<form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="class" value="[% CLASS %]"/>
-        <input type="hidden" name="method" value="[% METHOD %]"/>
-        <input type="file" name="source" />
+		<input type="hidden" name="class" value="[% CLASS %]"/>
+		<input type="hidden" name="method" value="[% METHOD %]"/>	
+		<input type="hidden" name="uploadedfileid" id="uploadedfileid" value="" />
+		<div class="form-group">
+			<label for="inputsrc">File input</label>
+        	<input type="file" name="source" id="fileToUpload" />
+        	<p class="help-block">Enter the file encoded in Unimarc</p>
+        </div>
+        
+        <button class="btn btn-default" id="fileuploadbutton" onclick="StartUpload(); return false;">Upload file</button>
+        <button class="btn btn-default" id="fileuploadcancel" onclick="CancelUpload(); return false;">Cancel</button>        
 
-        <input name="submitted" type="submit" value="Click me" />
+		<div id="fileuploadpanel">
+	        <div id="fileuploadstatus">Upload progress:
+	            <progress id="fileuploadprogress" min="0" max="100" value="0">
+	            </progress>
+	            <span class="fileuploadpercent">0</span>%
+	        </div>
+	        <div id="fileuploadfailed"></div>
+	    </div>
+	    
+        <button id="convertfile" name="submitted" class="btn btn-default" type="submit" value="convert">Convert</button>
     </form>
+
+<script type="text/javascript">
+//<![CDATA[
+var xhr;
+function CheckForm(f) {
+    if ($("#fileToUpload").value == '') {
+        alert(_("Please upload a file first."));
+    } else {
+        return submitBackgroundJob(f);
+    }
+    return false;
+}
+function StartUpload() {
+    if( $('#fileToUpload').prop('files').length == 0 ) return;
+    $('#fileuploadbutton').hide();
+    $("#fileuploadfailed").hide();
+    $("#fileuploadstatus").show();
+    $("#uploadedfileid").val('');
+    xhr= AjaxUpload( 
+    	$('#fileToUpload'), 
+    	$('#fileuploadprogress'), 
+    	'temp=1', 
+    	cbUpload 
+	);
+    $("#fileuploadcancel").show();
+    return false;
+}
+function CancelUpload() {
+    if( xhr ) xhr.abort();
+    $("#fileuploadstatus").hide();
+    $("#fileuploadbutton").show();
+    $("#fileuploadcancel").hide();
+    $("#fileuploadfailed").show();
+    $("#fileuploadfailed").text( _("Upload status: Cancelled ") );
+    return false;
+}
+function cbUpload( status, fileid ) {
+    if( status=='done' ) {
+        $("#uploadedfileid").val( fileid );
+        $('#fileToUpload').prop('disabled',true);
+        $('#fileuploadbutton').prop('disabled',true);
+        $('#fileuploadbutton').show();
+        $("#fileuploadcancel").hide();
+        $('#convertfile').show();
+    } else {
+        $('#fileuploadbutton').show();
+        $("#fileuploadcancel").hide();
+        $("#fileuploadstatus").hide();
+        $("#fileuploadfailed").show();
+        $("#fileuploadfailed").text( _("Upload status: ") +
+            ( status=='failed'? _("Failed"):
+            ( status=='denied'? _("Denied"): status ))
+        );
+    }
+}
+//]]>
+</script>
 
 [% INCLUDE 'intranet-bottom.inc' %]
