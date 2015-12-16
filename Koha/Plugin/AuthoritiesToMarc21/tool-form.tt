@@ -36,13 +36,15 @@
 	Select file
 </div>
 
-<div id="doc3" class="well">
-	<form method="post" enctype="multipart/form-data">
-		<input type="hidden" name="class" value="[% CLASS %]"/>
-		<input type="hidden" name="method" value="[% METHOD %]"/>	
-		<input type="hidden" name="uploadedfileid" id="uploadedfileid" value="" />
-		<div class="form-group">
-			<label for="inputsrc">File input</label>
+<div id="doc3" class="yui-t1">
+    <h1>Authorities MARC convert</h1>
+    <p>Convert authorities from UNIMARC to MARC21.</p>
+    <form method="post" enctype="multipart/form-data">
+    	<input type="hidden" name="class" value="[% CLASS %]"/>
+    	<input type="hidden" name="method" value="[% METHOD %]"/>	
+    	<input type="hidden" name="uploadedfileid" id="uploadedfileid" value="" />
+    	<div class="form-group">
+    		<label for="inputsrc">File input</label>
         	<input type="file" name="source" id="fileToUpload" />
         	<p class="help-block">Enter the file encoded in Unimarc</p>
         </div>
@@ -50,15 +52,15 @@
         <button class="btn btn-default" id="fileuploadbutton" onclick="StartUpload(); return false;">Upload file</button>
         <button class="btn btn-default" id="fileuploadcancel" onclick="CancelUpload(); return false;">Cancel</button>        
 
-		<div id="fileuploadpanel">
-	        <div id="fileuploadstatus">Upload progress:
-	            <progress id="fileuploadprogress" min="0" max="100" value="0">
-	            </progress>
-	            <span class="fileuploadpercent">0</span>%
-	        </div>
-	        <div id="fileuploadfailed"></div>
-	    </div>
-	    
+    	<div id="fileuploadpanel">
+            <div id="fileuploadstatus">Upload progress:
+                <progress id="fileuploadprogress" min="0" max="100" value="0">
+                </progress>
+                <span class="fileuploadpercent">0</span>%
+            </div>
+            <div id="fileuploadfailed"></div>
+        </div>
+        
         <button id="convertfile" name="submitted" class="btn btn-default" type="submit" value="convert">Convert</button>
     </form>
 
