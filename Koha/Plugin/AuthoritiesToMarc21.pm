@@ -12,6 +12,7 @@ use Data::Dumper;
 use Koha::Upload;
 use MARC::Moose::Formater::AuthorityUnimarcToMarc21;
 use MARC::Moose::Parser::Iso2709;
+use MARC::Moose::Reader::File::Iso2709;
 
 ## Here we set our plugin version
 our $VERSION = 1.00;
@@ -68,26 +69,29 @@ sub download_file {
     my $fileID = $cgi->param('uploadedfileid');
     if($fileID) {
         my $upload = Koha::Upload->new->get({ id => $fileID, filehandle => 1 });
+        
         my $fh = $upload->{fh};
+        $fh->close;
+        
         my $filename = $upload->{name}; # filename only, no path
+        my $uploadedfilePath = $upload->{path}; # filepath
         my $marcrecord= '';
 
         my $iso2709Parser = MARC::Moose::Parser::Iso2709->new;
         my $toMarc21Formater = MARC::Moose::Formater::AuthorityUnimarcToMarc21->new();
         
-        local $/ = "\035";
-        while (<$fh>) {
-            s/^\s+//;
-            s/\s+$//;
+        my $reader = MARC::Moose::Reader::File::Iso2709->new(
+                file => $uploadedfilePath
+        );
 
-            my $marc21 = $toMarc21Formater->format($iso2709Parser->parse($_));
-            $marcrecord.=$marc21->as('Text');
+        while ( my $unimarc = $reader->read() ) {
+            my $marc21 = $toMarc21Formater->format($unimarc);
+            $marcrecord.=$marc21->as('AuthorityUnimarcToMarc21')->as('iso2709');
         }
-        $fh->close;
-        
 
         print $cgi->header(
-            -type => 'application/octet-stream',
+            -type => 'application/octet-stream; charset=utf-8',
+            -attachment => 'converted.marc',
             -attachment => 'converted.marc',
         );
         print $marcrecord;
