@@ -71,23 +71,26 @@ sub download_file {
         my $fh = $upload->{fh};
         my $filename = $upload->{name}; # filename only, no path
         my $marcrecord= '';
+
+        my $iso2709Parser = MARC::Moose::Parser::Iso2709->new;
+        my $toMarc21Formater = MARC::Moose::Formater::AuthorityUnimarcToMarc21->new();
+        
         local $/ = "\035";
         while (<$fh>) {
             s/^\s+//;
             s/\s+$//;
-            $marcrecord.=$_;
+
+            my $marc21 = $toMarc21Formater->format($iso2709Parser->parse($_));
+            $marcrecord.=$marc21->as('Text');
         }
         $fh->close;
-
-        my $iso2709Parser = MARC::Moose::Parser::Iso2709->new;
-        my $toMarc21Formater = MARC::Moose::Formater::AuthorityUnimarcToMarc21->new();
-        my $marc21 = $toMarc21Formater->format($iso2709Parser->parse($marcrecord));
+        
 
         print $cgi->header(
             -type => 'application/octet-stream',
             -attachment => 'converted.marc',
         );
-        print $marc21->as('Text');
+        print $marcrecord;
         return 1;
     }
     return 0;
