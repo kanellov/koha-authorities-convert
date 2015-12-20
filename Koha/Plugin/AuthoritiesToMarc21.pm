@@ -10,6 +10,7 @@ use base qw(Koha::Plugins::Base);
 use Data::Dumper;
 
 use Koha::Upload;
+use Encode;
 use MARC::Moose::Formater::AuthorityUnimarcToMarc21;
 use MARC::Moose::Parser::Iso2709;
 use MARC::Moose::Reader::File::Iso2709;
@@ -86,7 +87,10 @@ sub download_file {
 
         while ( my $unimarc = $reader->read() ) {
             my $marc21 = $toMarc21Formater->format($unimarc);
-            $marcrecord.=$marc21->as('AuthorityUnimarcToMarc21')->as('iso2709');
+            
+            $marcrecord.=Encode::encode_utf8(
+                $marc21->as('AuthorityUnimarcToMarc21')->as('iso2709')
+            );
         }
 
         print $cgi->header(
