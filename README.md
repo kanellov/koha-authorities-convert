@@ -21,7 +21,7 @@ or
 perl -MCPAN -e 'install MARC::Moose'
 ```
 
-Download the [.kpz]() and install plugin in koha from "Koha Administration" > "Manage Plugins". 
+Download the [.kpz](./plugin.kpz) and install plugin in koha from "Koha Administration" > "Manage Plugins". 
 
 ## Usage
 
